@@ -1,0 +1,14 @@
+{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Action": [
+        "dynamodb:Query",
+        "dynamodb:PutItem",
+        "dynamodb:Scan"
+      ],
+      "Resource": "${table_arn}",
+      "Effect": "Allow"
+    }
+  ]
+}

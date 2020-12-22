@@ -2,6 +2,7 @@ from datetime import datetime
 from decimal import Decimal
 
 import pandas as pd
+import simplejson as json
 import yfinance as yf
 
 from erasmo.constant import PARTITION_KEY
@@ -137,8 +138,9 @@ class Portfolio:
         raise ValueError(f"{ticker} is not in the portfolio!")
 
     def to_json(self):
-        return {
+        as_dict = {
             PARTITION_KEY: self.name,
             "companies": self.companies,
             "value": self.value,
         }
+        return json.dumps(as_dict)

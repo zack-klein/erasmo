@@ -62,16 +62,14 @@ def portfolio():
     return {"results": response}
 
 
-@app.route("/portfolio/<portfolio_id>/")
-def one_portfolio(portfolio_id):
-    portfolio = operations.get_portfolio(portfolio_id)
-    return {"results": portfolio}
-
-
-@app.route("/portfolio/<portfolio_id>/", methods=["POST", "DELETE"])
+@app.route("/portfolio/<portfolio_id>/", methods=["GET", "POST", "DELETE"])
 def shares(portfolio_id):
 
-    if request.method == "POST":
+    if request.method == "GET":
+        portfolio = operations.get_portfolio(portfolio_id)
+        response = {"results": portfolio}
+
+    elif request.method == "POST":
         data = request.get_json(force=True)
 
         portfolio_id = data.get("portfolio_id")
@@ -97,7 +95,7 @@ def shares(portfolio_id):
 
         portfolio_id = data.get("portfolio_id")
         ticker = data.get("ticker")
-        response = operations.remove_company(portfolio_id, ticker,)
+        response = operations.remove_company(portfolio_id, ticker)
 
     return response
 

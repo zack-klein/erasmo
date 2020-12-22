@@ -113,8 +113,8 @@ class Portfolio:
 
         if shares > existing_shares:
             raise ValueError(
-                f"{company['ticker']} only has {existing_shares}! "
-                f"You tried to delete {shares}."
+                f"{self.name} only has {existing_shares} shares of "
+                f"{company['ticker']}! You tried to delete {shares}."
             )
 
         elif shares == existing_shares:
@@ -140,4 +140,5 @@ class Portfolio:
         return {
             PARTITION_KEY: self.name,
             "companies": self.companies,
+            "value": self.value,
         }

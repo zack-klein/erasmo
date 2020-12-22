@@ -49,7 +49,8 @@ def _update_portfolio(portfolio):
     dynamodb = boto3.resource("dynamodb")
     table = dynamodb.Table(TABLE)
     response = table.put_item(Item=portfolio.to_json())
-    return response
+    portfolio = get_portfolio(portfolio.to_json()[PARTITION_KEY])
+    return portfolio
 
 
 def delete_portfolio(name):

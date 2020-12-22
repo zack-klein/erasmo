@@ -11,108 +11,90 @@ app = Flask(__name__)
 def page_not_found(e):
     return {"error": True, "message": str(e)}
 
+
 @app.errorhandler(Exception)
 def handle_exception(e):
     """
     Return JSON instead of HTML for HTTP errors.
     """
     return {
-    	"error": True, 
-    	"message": f"An error occurred: {e}",
+        "error": True,
+        "message": f"An error occurred: {e}",
     }
 
 
-@app.errorhandler(500)
-def page_not_found(e):
-    return {"error": True, "message": "Uncaught exception in the application."}
-
-
+# Routes
 @app.route("/portfolio/", methods=["GET", "POST", "DELETE"])
 def portfolio():
 
-	if request.method == "GET":
-		portfolios = operations.list_portfolios()
-		response = portfolios
+    if request.method == "GET":
+        portfolios = operations.list_portfolios()
+        response = portfolios
 
-	elif request.method == "POST":
-		portfolio_id = request.get_json(force=True).get("portfolio_id")
-		
-		if not portfolio_id:
-			abort(400, description="Expected portfolio_id and didn't receive it!")
+    elif request.method == "POST":
+        portfolio_id = request.get_json(force=True).get("portfolio_id")
 
-		else:
-			response = operations.add_portfolio(portfolio_id).to_json()
+        if not portfolio_id:
+            abort(
+                400, description="Expected portfolio_id and didn't receive it!"
+            )
 
-	elif request.method == "DELETE":
-		portfolio_id = request.get_json(force=True).get("portfolio_id")
-		
-		if not portfolio_id:
-			abort(400, description="Expected portfolio_id and didn't receive it!")
+        else:
+            response = operations.add_portfolio(portfolio_id).to_json()
 
-		else:
-			response = operations.delete_portfolio(portfolio_id)
+    elif request.method == "DELETE":
+        portfolio_id = request.get_json(force=True).get("portfolio_id")
 
+        if not portfolio_id:
+            abort(
+                400, description="Expected portfolio_id and didn't receive it!"
+            )
 
-	return {"results": response}
+        else:
+            response = operations.delete_portfolio(portfolio_id)
+
+    return {"results": response}
 
 
 @app.route("/portfolio/<portfolio_id>/")
 def one_portfolio(portfolio_id):
-	portfolio = operations.get_portfolio(portfolio_id)
-	return {"results": portfolio}
+    portfolio = operations.get_portfolio(portfolio_id)
+    return {"results": portfolio}
 
 
 @app.route("/portfolio/<portfolio_id>/", methods=["POST", "DELETE"])
 def shares(portfolio_id):
 
-	if request.method == "POST":
-		data = request.get_json(force=True)
+    if request.method == "POST":
+        data = request.get_json(force=True)
 
-		portfolio_id = data.get("portfolio_id")
-		ticker = data.get("ticker")
-		shares = int(data.get("shares"))
-		intention = data.get("intention")
+        portfolio_id = data.get("portfolio_id")
+        ticker = data.get("ticker")
+        shares = int(data.get("shares"))
+        intention = data.get("intention")
 
-		if not all([
-			portfolio_id,
-			ticker,
-			shares,
-			intention,
-		]) or not any([
-			intention.upper() == "ADD",
-			intention.upper() == "REMOVE",
-		]):
-			abort(
-				400, 
-				description="Need: portfolio_id, ticker, shares, intention."
-			)
-		
-		if intention.upper() == "ADD":
-			response = operations.add_shares(
-				portfolio_id,
-				ticker,
-				shares,
-			)
-		elif intention.upper() == "REMOVE":
-			response = operations.remove_shares(
-				portfolio_id,
-				ticker,
-				shares,
-			)
+        if not all([portfolio_id, ticker, shares, intention]) or not any(
+            [intention.upper() == "ADD", intention.upper() == "REMOVE"]
+        ):
+            abort(
+                400,
+                description="Need: portfolio_id, ticker, shares, intention.",
+            )
 
-	elif request.method == "DELETE":
-		data = request.get_json(force=True)
-		
-		portfolio_id = data.get("portfolio_id")
-		ticker = data.get("ticker")
-		response = operations.remove_company(
-			portfolio_id,
-			ticker,
-		)
+        if intention.upper() == "ADD":
+            response = operations.add_shares(portfolio_id, ticker, shares,)
+        elif intention.upper() == "REMOVE":
+            response = operations.remove_shares(portfolio_id, ticker, shares,)
 
+    elif request.method == "DELETE":
+        data = request.get_json(force=True)
 
-	return response
+        portfolio_id = data.get("portfolio_id")
+        ticker = data.get("ticker")
+        response = operations.remove_company(portfolio_id, ticker,)
+
+    return response
 
 
 if __name__ == "__main__":
-	app.run(host="0.0.0.0", debug=True)
+    app.run(host="0.0.0.0", debug=True)

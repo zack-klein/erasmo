@@ -6,25 +6,28 @@ from erasmo.constant import TABLE, PARTITION_KEY
 from boto3.dynamodb.conditions import Key
 
 
+def _get_table():
+    dynamodb = boto3.resource("dynamodb", region_name="us-east-1")
+    table = dynamodb.Table(TABLE)
+    return table
+
+
 def add_portfolio(name):
     portfolio = Portfolio(name)
-    dynamodb = boto3.resource("dynamodb")
-    table = dynamodb.Table(TABLE)
+    table = _get_table()
     table.put_item(Item=portfolio.to_json())
     return portfolio
 
 
 def list_portfolios():
-    dynamodb = boto3.resource("dynamodb")
-    table = dynamodb.Table(TABLE)
+    table = _get_table()
     items = table.scan(ProjectionExpression=PARTITION_KEY)
     portfolios = [p[PARTITION_KEY] for p in items.get("Items", [])]
     return portfolios
 
 
 def _get_portfolio(name):
-    dynamodb = boto3.resource("dynamodb")
-    table = dynamodb.Table(TABLE)
+    table = _get_table()
 
     response = table.query(KeyConditionExpression=Key(PARTITION_KEY).eq(name))
     items = response.get("Items")
@@ -46,16 +49,14 @@ def get_portfolio(name):
 
 
 def _update_portfolio(portfolio):
-    dynamodb = boto3.resource("dynamodb")
-    table = dynamodb.Table(TABLE)
-    response = table.put_item(Item=portfolio.to_json())
+    table = _get_table()
+    table.put_item(Item=portfolio.to_json())
     portfolio = get_portfolio(portfolio.to_json()[PARTITION_KEY])
     return portfolio
 
 
 def delete_portfolio(name):
-    dynamodb = boto3.resource("dynamodb")
-    table = dynamodb.Table(TABLE)
+    table = _get_table()
     table.delete_item(Key={PARTITION_KEY: name})
     return True
 

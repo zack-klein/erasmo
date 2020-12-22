@@ -29,7 +29,13 @@ def portfolio():
 
     if request.method == "GET":
         portfolios = operations.list_portfolios()
-        response = portfolios
+        response = []
+        for portfolio in portfolios:
+            d = {
+                "name": portfolio,
+                "detail_url": f"{request.base_url}{portfolio}/",
+            }
+            response.append(d)
 
     elif request.method == "POST":
         portfolio_id = request.get_json(force=True).get("portfolio_id")
@@ -76,10 +82,10 @@ def shares(portfolio_id):
         if not all([portfolio_id, ticker, shares, intention]) or not any(
             [intention.upper() == "ADD", intention.upper() == "REMOVE"]
         ):
-            abort(
-                400,
-                description="Need: portfolio_id, ticker, shares, intention.",
-            )
+            msg = "Need: portfolio_id, ticker, shares, intention."
+            msg += " shares must be an integer or integer-serializable string."
+            msg += " intention myst be either 'ADD' or 'REMOVE'."
+            abort(400, description=msg)
 
         if intention.upper() == "ADD":
             response = operations.add_shares(portfolio_id, ticker, shares)

@@ -8,8 +8,13 @@ app = Flask(__name__)
 
 # Error handlers
 @app.errorhandler(400)
-def page_not_found(e):
+def bad_request(e):
     return {"error": True, "message": str(e)}
+
+
+@app.errorhandler(404)
+def page_not_found(e):
+    return {"error": True, "message": "Page not found!"}
 
 
 @app.errorhandler(Exception)

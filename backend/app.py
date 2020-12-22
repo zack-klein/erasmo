@@ -82,9 +82,9 @@ def shares(portfolio_id):
             )
 
         if intention.upper() == "ADD":
-            response = operations.add_shares(portfolio_id, ticker, shares,)
+            response = operations.add_shares(portfolio_id, ticker, shares)
         elif intention.upper() == "REMOVE":
-            response = operations.remove_shares(portfolio_id, ticker, shares,)
+            response = operations.remove_shares(portfolio_id, ticker, shares)
 
     elif request.method == "DELETE":
         data = request.get_json(force=True)

@@ -27,7 +27,7 @@ sed -i '4,6s/nginx/ec2-user/g' /etc/nginx/nginx.conf
 
 ## HTTPS woes
 
-I was feeling pretty good once I finally got Nginx up and running. I followed [this guide](https://blog.miguelgrinberg.com/post/running-your-flask-application-over-https) from [the great Miguel Grinberg](https://blog.miguelgrinberg.com/) to quickly set up HTTPS myself. And it worked like a charm :party:! It was actually much simpler than I was expecting it to be (it was really just running a few `certbot` commands and adding some Nginx config).  Here's a handy command to create an SSL certificate with one line:
+I was feeling pretty good once I finally got Nginx up and running. I followed [this guide](https://blog.miguelgrinberg.com/post/running-your-flask-application-over-https) from [the great Miguel Grinberg](https://blog.miguelgrinberg.com/) to quickly set up HTTPS myself. And it worked like a charm :partying_face:! It was actually much simpler than I was expecting it to be (it was really just running a few `certbot` commands and adding some Nginx config).  Here's a handy command to create an SSL certificate with one line:
 
 ```bash
 certbot certonly \
@@ -42,9 +42,10 @@ certbot certonly \
 But then I ran into another problem... what happens if I tear down my server and need to get HTTPS back up and running on a completely new machine?
 
 (This kind of) SSL creates a certificate by going through the following:
-	- The certificate authority pings a special place in your domain to "test" you have full control over it
-	- If you pass this test, it decides it "trusts" you, and gives you a certificate
-	- This cert is used to encrypt traffic
+
+- The certificate authority pings a special place in your domain to "test" you have full control over it
+- If you pass this test, it decides it "trusts" you, and gives you a certificate
+- This cert is used to encrypt traffic
 
 There's a sneaky assumption built into this: **you must already be running on HTTP in order to create a certificate for HTTPS** (which makes perfect sense, how can they verify you if you aren't already running something on your domain). But if I'm starting from a fresh server after I've already created the certificates, I won't be running on HTTP or HTTPS, so I can't create new certificates!
 

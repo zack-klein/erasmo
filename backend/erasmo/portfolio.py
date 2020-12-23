@@ -143,4 +143,8 @@ class Portfolio:
             "companies": self.companies,
             "value": self.value,
         }
-        return json.dumps(as_dict)
+        # We serialize to JSON and convert back to deal with weird decimal
+        # data types from dynamodb
+        s = json.dumps(as_dict)
+        as_json = json.loads(s)
+        return as_json

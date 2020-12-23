@@ -31,7 +31,7 @@ def handle_exception(e):
 # Routes
 @app.route("/ping/")
 def ping():
-    return {"result": "pong"}
+    return "pong"
 
 
 @app.route("/portfolio/", methods=["GET", "POST", "DELETE"])

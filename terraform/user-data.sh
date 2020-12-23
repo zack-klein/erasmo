@@ -74,3 +74,17 @@ chown -R ec2-user: $BACKEND
 
 systemctl start nginx
 systemctl enable nginx
+
+
+# Make an update script
+UPDATE_SCRIPT_PATH="$HOME/update.sh"
+cat <<EOF > $UPDATE_SCRIPT_PATH
+set -ex
+
+cd $HOME/erasmo
+systemctl stop app
+git pull
+systemctl start app
+EOF
+
+

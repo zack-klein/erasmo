@@ -82,7 +82,6 @@ def shares(portfolio_id):
     elif request.method == "POST":
         data = request.get_json(force=True)
 
-        portfolio_id = data.get("portfolio_id")
         ticker = data.get("ticker")
         shares = int(data.get("shares"))
         intention = data.get("intention")
@@ -90,7 +89,7 @@ def shares(portfolio_id):
         if not all([portfolio_id, ticker, shares, intention]) or not any(
             [intention.upper() == "ADD", intention.upper() == "REMOVE"]
         ):
-            msg = "Need: portfolio_id, ticker, shares, intention."
+            msg = "Need: ticker, shares, intention."
             msg += " shares must be an integer or integer-serializable string."
             msg += " intention myst be either 'ADD' or 'REMOVE'."
             abort(400, description=msg)
@@ -102,9 +101,12 @@ def shares(portfolio_id):
 
     elif request.method == "DELETE":
         data = request.get_json(force=True)
-
-        portfolio_id = data.get("portfolio_id")
         ticker = data.get("ticker")
+
+        if not ticker:
+            msg = "Need: ticker."
+            abort(400, msg)
+
         response = operations.remove_company(portfolio_id, ticker)
 
     return response

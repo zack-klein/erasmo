@@ -50,7 +50,7 @@ def get_portfolio(name):
 
 def _update_portfolio(portfolio):
     table = _get_table()
-    table.put_item(Item=portfolio.to_json())
+    table.put_item(Item=portfolio.to_ddb())
     portfolio = get_portfolio(portfolio.to_json()[PARTITION_KEY])
     return portfolio
 

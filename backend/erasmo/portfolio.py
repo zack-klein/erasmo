@@ -86,7 +86,9 @@ class Portfolio:
             self.add_shares(ticker, shares)
 
         else:
-            self.companies.append({"ticker": ticker, "shares": shares})
+            self.companies.append(
+                {"ticker": ticker, "shares": Decimal(shares)}
+            )
             self._recalculate_portfolio()
 
     def add_shares(self, ticker, shares):
@@ -137,7 +139,22 @@ class Portfolio:
 
         raise ValueError(f"{ticker} is not in the portfolio!")
 
+    def to_ddb(self):
+        """
+        Format the portfolio to use decimal.Decimal's instead of floats.
+        """
+        as_dict = {
+            PARTITION_KEY: self.name,
+            "companies": self.companies,
+            "value": self.value,
+        }
+        return as_dict
+
     def to_json(self):
+        """
+        Format the portfolio to be REST friendly (decimal.Decimal's) screw
+        this up.
+        """
         as_dict = {
             PARTITION_KEY: self.name,
             "companies": self.companies,

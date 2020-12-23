@@ -9,6 +9,16 @@
       ],
       "Resource": "${table_arn}",
       "Effect": "Allow"
+    },
+    {
+      "Action": [
+        "secretsmanager:*"
+      ],
+      "Resource": [
+        "arn:aws:secretsmanager:us-east-1:111373087273:secret:erasmo_api_cert-I45ndG",
+        "arn:aws:secretsmanager:us-east-1:111373087273:secret:erasmo_api_privkey-JAWD0Z"
+      ],
+      "Effect": "Allow"
     }
   ]
 }

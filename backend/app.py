@@ -28,6 +28,15 @@ def handle_exception(e):
     }
 
 
+@app.after_request
+def add_cors(response):
+    """
+    A hacky CORS!
+    """
+    response.headers.add("Access-Control-Allow-Origin", "*")
+    return response
+
+
 # Routes
 @app.route("/ping/")
 def ping():

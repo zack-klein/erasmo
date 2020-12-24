@@ -9,12 +9,12 @@ app = Flask(__name__)
 # Error handlers
 @app.errorhandler(400)
 def bad_request(e):
-    return {"error": True, "message": str(e)}
+    return {"error": True, "message": str(e)}, 400
 
 
 @app.errorhandler(404)
 def page_not_found(e):
-    return {"error": True, "message": "Page not found!"}
+    return {"error": True, "message": "Page not found!"}, 404
 
 
 @app.errorhandler(Exception)
@@ -22,10 +22,7 @@ def handle_exception(e):
     """
     Return JSON instead of HTML for HTTP errors.
     """
-    return {
-        "error": True,
-        "message": f"An error occurred: {e}",
-    }
+    return {"error": True, "message": f"An error occurred: {e}"}, 500
 
 
 @app.after_request

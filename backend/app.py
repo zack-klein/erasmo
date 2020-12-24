@@ -83,7 +83,7 @@ def shares(portfolio_id):
 
     if request.method == "GET":
         portfolio = operations.get_portfolio(portfolio_id)
-        response = {"results": portfolio}
+        response = portfolio
 
     elif request.method == "POST":
         data = request.get_json(force=True)
@@ -115,7 +115,7 @@ def shares(portfolio_id):
 
         response = operations.remove_company(portfolio_id, ticker)
 
-    return response
+    return {"results": response}
 
 
 if __name__ == "__main__":

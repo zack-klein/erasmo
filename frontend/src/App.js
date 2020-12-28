@@ -5,14 +5,16 @@ import {
   Route
 } from "react-router-dom";
 
-import Portfolio from "./Portfolio"
+import Home from "./pages/Home"
+import Portfolio from "./pages/Portfolio"
 
 function App() {
   return (
     <Router>
       <div className="App">
         <Switch>
-          <Route path="/:portfolioId" children={<Portfolio />} />
+          <Route path="/view/:portfolioId" children={<Portfolio />} />
+          <Route path="/" children={<Home />} />
         </Switch>
       </div>
     </Router>

@@ -1,6 +1,6 @@
 import { Doughnut } from "react-chartjs-2";
-import { useParams } from "react-router-dom";
-import { Container, Dropdown, Form, Grid, Header, Input, Label, Loader } from "semantic-ui-react";
+import { useParams, Redirect } from "react-router-dom";
+import { Button, Container, Dropdown, Form, Grid, Header, Input, Label, Loader, Statistic } from "semantic-ui-react";
 
 import { useEffect, useState } from "react";
 
@@ -14,6 +14,10 @@ function randomRgba() {
     return 'rgba(' + o(r()*s) + ',' + o(r()*s) + ',' + o(r()*s) + ')';
 }
 
+function numberWithCommas(x) {
+    return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+}
+
 
 function buildDoughnut(response) {
 	let labels = [];
@@ -22,18 +26,31 @@ function buildDoughnut(response) {
 	// TODO: Add values (need price from backend)
 	let companies = response.results.companies;
 
-	companies.map(company => {
-		labels.push(company.ticker)
-		shares.push(company.shares)
-		colors.push(randomRgba())
-	})
+	let chart;
 
-	let chartData = {
-		labels: labels,
-		datasets: [{data: shares, backgroundColor: colors}]
+	if (companies.length > 0) {
+		companies.map(company => {
+			labels.push(company.ticker)
+			shares.push(company.shares)
+			colors.push(randomRgba())
+		})
+
+		let chartData = {
+			labels: labels,
+			datasets: [{data: shares, backgroundColor: colors}]
+		}
+
+		chart = <Doughnut data={chartData} />
+
+	} else {
+		chart = (
+			<div align="center">
+				There's nothing here! Make a transaction below.
+			</div>
+		)
 	}
 
-	let chart = <Doughnut data={chartData} />
+	
 	return chart
 }
 
@@ -47,6 +64,8 @@ export default function Portfolio() {
 	const [shares, setShares] = useState(10);
 	const [ticker, setTicker] = useState("AAPL");
 	const [feedback, setFeedback] = useState(<React.Fragment></React.Fragment>)
+	const [value, setValue] = useState("Fetching portfolio stats...")
+	const [redirect, setRedirect] = useState(null)
 
 
 	var params = useParams();
@@ -80,6 +99,24 @@ export default function Portfolio() {
 		
 	}
 
+	var onDeletePortfolio = () => {
+		fetch(`/portfolio/`, {
+			method: 'DELETE',
+  		body: JSON.stringify({ portfolio_id: params.portfolioId })
+		}).then(response => {
+			if (response.ok) {
+				return response.json()
+			} else {
+				return response.json().then(json => {throw new Error(json.message)})
+			}
+
+		}).then((json) => {
+			setRedirect(<Redirect to="/" />)
+		}).catch((e) => {
+			setFeedback(<Label color="red" content={e.message} />)
+		})
+	}
+
 	// Check the health of the system
 	useEffect(() => {
 
@@ -98,7 +135,7 @@ export default function Portfolio() {
 
 	}, [params, reloader])
 
-	// Populate the dougnhut data chart
+	// Populate the components that depend on the fetch
 	useEffect(() => {
 
 		fetch(`/portfolio/${params.portfolioId}`).then(response => {
@@ -109,8 +146,15 @@ export default function Portfolio() {
 				throw Error(response.statusText);
 			}
 		}).then(json => {
+			let newValue = json.results.value
 			let newDoughnut = buildDoughnut(json)
 			setDoughnut(newDoughnut)
+			setValue(
+				<Statistic>
+			    <Statistic.Value>${numberWithCommas(newValue.toFixed(2))}</Statistic.Value>
+			    <Statistic.Label>Total portfolio value</Statistic.Label>
+			  </Statistic>
+			 )
 		}).catch((e) => {
 			let txt = "Hmm... Can't find this portfolio. You sure it exists?";
 			setDoughnut(<Label color="red" content={`${txt}`} />)
@@ -118,6 +162,8 @@ export default function Portfolio() {
 		
 		
 	}, [params, reloader])
+
+	if (redirect) return redirect;
 
 	return (
 		<Container>
@@ -137,6 +183,14 @@ export default function Portfolio() {
 
 					<Grid.Row columns={1}>
 						<Grid.Column>
+							<div align="center">
+								{value}
+							</div>
+						</Grid.Column>
+					</Grid.Row>
+
+					<Grid.Row columns={1}>
+						<Grid.Column>
 							{doughnut}
 						</Grid.Column>
 					</Grid.Row>
@@ -145,25 +199,27 @@ export default function Portfolio() {
 						<Grid.Column>
 							<div align="center">
 								<Form onSubmit={onSubmit}>
-									I want to 
-									<Dropdown
-									    placeholder='Select an action'
-									    selection
-									    options={[ {key: "ADD", text: "ADD", value: "ADD"}, {key: "REMOVE", text: "REMOVE", value: "REMOVE"} ]}
-									    value={intention}
-									    onChange={(e) => setIntention(e.target.innerText)}
-									  />
-									 <Input
-									 	placeholder="10" 
-									 	value={shares}
-									 	onChange={(e) => setShares(e.target.value)}
-									 />
-									shares of 
-									<Input
-										placeholder="AAPL" 
-										value={ticker}
-										onChange={(e) => setTicker(e.target.value)}
-									/>
+									<p>
+										I want to 
+										<Dropdown
+										    placeholder='Select an action'
+										    selection
+										    options={[ {key: "ADD", text: "ADD", value: "ADD"}, {key: "REMOVE", text: "REMOVE", value: "REMOVE"} ]}
+										    value={intention}
+										    onChange={(e) => setIntention(e.target.innerText)}
+										  />
+										 <Input
+										 	placeholder="10" 
+										 	value={shares}
+										 	onChange={(e) => setShares(e.target.value)}
+										 />
+										shares of 
+										<Input
+											placeholder="AAPL" 
+											value={ticker}
+											onChange={(e) => setTicker(e.target.value)}
+										/>
+									</p>
 									<Form.Button type="submit">
 										Submit
 									</Form.Button>
@@ -178,6 +234,18 @@ export default function Portfolio() {
 						</Grid.Column>
 					</Grid.Row>
 
+					<Grid.Row columns={1}>
+						<Grid.Column>
+							<div align="right">
+								<Button
+									icon='trash'
+									color="red"
+									content="Delete this portfolio" 
+									onClick={onDeletePortfolio}
+								/>
+							</div>
+						</Grid.Column>
+					</Grid.Row>
 
 				</Grid>
 

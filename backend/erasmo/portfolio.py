@@ -32,7 +32,12 @@ class Portfolio:
         Set the value of the portfolio.
         """
         value = 0
-        date = datetime.now().strftime("%Y-%m-%d")
+
+        # Need to set the date
+        if not self.data.empty:
+            date = max(self.data["Close"].index)
+        else:
+            date = datetime.now().strftime("%Y-%m-%d")
 
         # One company vs. `n` companies have different structures :(
         if len(self.companies) == 1:

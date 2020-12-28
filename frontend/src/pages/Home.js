@@ -6,6 +6,10 @@ import { useState, useEffect, Fragment } from "react";
 
 import MainMenu from "../components/MainMenu";
 
+import getSettings from "../settings"
+
+
+const settings = getSettings()
 
 function PortfolioList(response={results: []}) {
 
@@ -44,7 +48,7 @@ export default function Home() {
 
 	useEffect(() => {
 
-		fetch(`/portfolio/`).then(response => {
+		fetch(`${settings.apiUrl}/portfolio/`).then(response => {
 			if (response.ok) {
 				return response.json()
 			} else {
@@ -61,7 +65,7 @@ export default function Home() {
 	}, [reloader])
 
 	var onSubmit = () => {
-		fetch(`/portfolio/`, {
+		fetch(`${settings.apiUrl}/portfolio/`, {
 			method: "post",
 			body: JSON.stringify({ portfolio_id: portfolioId })
 		}).then(response => {

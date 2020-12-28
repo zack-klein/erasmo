@@ -1,12 +1,16 @@
 import { Doughnut } from "react-chartjs-2";
 import { useParams, Redirect } from "react-router-dom";
-import { Button, Container, Dropdown, Form, Grid, Header, Input, Label, Loader, Statistic } from "semantic-ui-react";
+import { Button, Container, Dropdown, Form, Grid, Header, Input, Label, Loader, Message, Statistic } from "semantic-ui-react";
 
 import { useEffect, useState } from "react";
 
 import React from "react"
 
 import MainMenu from "../components/MainMenu"
+
+import getSettings from "../settings"
+
+const settings = getSettings()
 
 
 function randomRgba() {
@@ -16,6 +20,39 @@ function randomRgba() {
 
 function numberWithCommas(x) {
     return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+}
+
+function stringToHex(str) {
+  var hash = 0;
+  for (var i = 0; i < str.length; i++) {
+    hash = str.charCodeAt(i) + ((hash << 5) - hash);
+  }
+  var colour = '#';
+  for (var i = 0; i < 3; i++) {
+    var value = (hash >> (i * 8)) & 0xFF;
+    colour += ('00' + value.toString(16)).substr(-2);
+  }
+  return colour;
+}
+
+function hexToRgbA(hex){
+    var c;
+    if(/^#([A-Fa-f0-9]{3}){1,2}$/.test(hex)){
+        c= hex.substring(1).split('');
+        if(c.length== 3){
+            c= [c[0], c[0], c[1], c[1], c[2], c[2]];
+        }
+        c= '0x'+c.join('');
+        return 'rgba('+[(c>>16)&255, (c>>8)&255, c&255].join(',')+',1)';
+    }
+    throw new Error('Bad Hex');
+}
+
+
+function stringToColor(str) {
+	let hex = stringToHex(str)
+	let rgba = hexToRgbA(hex)
+	return rgba
 }
 
 
@@ -32,7 +69,7 @@ function buildDoughnut(response) {
 		companies.map(company => {
 			labels.push(company.ticker)
 			shares.push(company.shares)
-			colors.push(randomRgba())
+			colors.push(stringToColor(company.ticker))
 		})
 
 		let chartData = {
@@ -63,23 +100,31 @@ export default function Portfolio() {
 	const [intention, setIntention] = useState("ADD");
 	const [shares, setShares] = useState(10);
 	const [ticker, setTicker] = useState("AAPL");
-	const [feedback, setFeedback] = useState(<React.Fragment></React.Fragment>)
 	const [value, setValue] = useState("Fetching portfolio stats...")
 	const [redirect, setRedirect] = useState(null)
+
+	// Used to change the state of the form
+	const [success, setSuccess] = useState(false)
+	const [successMsg, setSuccessMsg] = useState("")
+	const [error, setError] = useState(false)
+	const [errMsg, setErrMsg] = useState("")
+	const [loading, setLoading] = useState(false)
 
 
 	var params = useParams();
 
 	var onSubmit = () => {
+		setLoading(true)
+		setError(false)
+		setSuccess(false)
 		let data = {
 			ticker: ticker,
 			shares: shares,
 			intention: intention,
 		}
 		let newReloader = reloader + "0";
-		setFeedback(<Loader active />)
 
-		fetch(`/portfolio/${params.portfolioId}`, {
+		fetch(`${settings.apiUrl}/portfolio/${params.portfolioId}`, {
 			method: 'post',
     		body: JSON.stringify(data)
 		}).then(response => {
@@ -90,17 +135,24 @@ export default function Portfolio() {
 			}
 
 		}).then((json) => {
+			setLoading(false)
+			let msg = `${intention} ${shares} ${ticker} completed successfully!`
+			setSuccessMsg(msg)
+			setSuccess(true)
 			setReloader(newReloader)
-			setFeedback(<Label color="green" content="Success!" />)
 		}).catch((e) => {
-			setFeedback(<Label color="red" content={e.message} />)
+			setLoading(false)
+			setErrMsg(e.toString())
+			setError(true)
 		})
 
 		
 	}
 
 	var onDeletePortfolio = () => {
-		fetch(`/portfolio/`, {
+		setError(false)
+		setSuccess(false)
+		fetch(`${settings.apiUrl}/portfolio/`, {
 			method: 'DELETE',
   		body: JSON.stringify({ portfolio_id: params.portfolioId })
 		}).then(response => {
@@ -113,14 +165,15 @@ export default function Portfolio() {
 		}).then((json) => {
 			setRedirect(<Redirect to="/" />)
 		}).catch((e) => {
-			setFeedback(<Label color="red" content={e.message} />)
+			setError(true)
+			setErrMsg(e.toString())
 		})
 	}
 
 	// Check the health of the system
 	useEffect(() => {
 
-		fetch("/ping").then(response => {
+		fetch(`${settings.apiUrl}/ping`).then(response => {
 			if (response.ok) {
 				return response.text()	
 			}
@@ -138,7 +191,7 @@ export default function Portfolio() {
 	// Populate the components that depend on the fetch
 	useEffect(() => {
 
-		fetch(`/portfolio/${params.portfolioId}`).then(response => {
+		fetch(`${settings.apiUrl}/portfolio/${params.portfolioId}`).then(response => {
 			if (response.ok) {
 				return response.json()	
 			}
@@ -198,7 +251,7 @@ export default function Portfolio() {
 					<Grid.Row columns={1}>
 						<Grid.Column>
 							<div align="center">
-								<Form onSubmit={onSubmit}>
+								<Form onSubmit={onSubmit} success={success} loading={loading} error={error}>
 									<p>
 										I want to 
 										<Dropdown
@@ -220,17 +273,21 @@ export default function Portfolio() {
 											onChange={(e) => setTicker(e.target.value)}
 										/>
 									</p>
+									<Message
+							      success
+							      header='Transaction Succeeded'
+							      content={successMsg}
+							    />
+							    <Message
+							      error
+							      header='Transaction Failed'
+							      content={errMsg}
+							    />
 									<Form.Button type="submit">
 										Submit
 									</Form.Button>
 								</Form>
 							</div>
-						</Grid.Column>
-					</Grid.Row>
-
-					<Grid.Row columns={1}>
-						<Grid.Column>
-							{feedback}
 						</Grid.Column>
 					</Grid.Row>
 

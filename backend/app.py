@@ -30,7 +30,9 @@ def add_cors(response):
     """
     A hacky CORS!
     """
+    # TODO: Specify specific origins
     response.headers.add("Access-Control-Allow-Origin", "*")
+    response.headers.add("Access-Control-Allow-Methods", "DELETE,POST,GET,PUT")
     return response
 
 

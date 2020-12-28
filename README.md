@@ -2,6 +2,8 @@
 
 A nifty app to simulate trading stocks.
 
+![logo](./frontend/src/imgs/noText.png)
+
 :warning: This app doesn't actually trade stocks. It just lets you build virtual portfolios. It (obviously) shouldn't be used for any kind of investment decision.
 
 [Here's](https://www.economist.com/christmas-specials/2020/12/19/erasmuss-teachings-are-still-pertinent-today) a nice article about the real Erasmus, who this project is named for.

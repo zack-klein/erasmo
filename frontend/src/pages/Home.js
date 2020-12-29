@@ -88,13 +88,7 @@ export default function Home() {
 				return response.json().then(json => {throw new Error(json.message)})
 			}
 		}).then((json) => {
-			var newPortfolios = <PortfolioList {...json} />
-
-			setLoading(false)
-			setSuccess(true)
-			setSuccessMsg(`Successfully created: ${portfolioId}!`)
-			setPortfolios(newPortfolios)
-			setReloader(reloader + "0")
+			setRedirect(<Redirect to={`/view/${portfolioId}`} />)
 		}).catch((e) => {
 			setPortfolios("An error occured. Please refresh the page.")
 			setLoading(false)

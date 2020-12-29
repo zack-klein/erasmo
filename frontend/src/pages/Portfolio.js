@@ -195,7 +195,7 @@ export default function Portfolio() {
 	// Controls the values in the form
 	const [intention, setIntention] = useState("ADD");
 	const [shares, setShares] = useState(10);
-	const [ticker, setTicker] = useState("AAPL");
+	const [ticker, setTicker] = useState("");
 
 
 	var params = useParams();

@@ -279,8 +279,6 @@ export default function Portfolio() {
 
 		}).then((json) => {
 			// Reset the charts to be loading
-			setDoughnut(<Loader active/>)
-			setTimeChart(<Loader active/>)
 			setPortfolioValue("Recalculating portfolio value...")
 			setAggTimeChartCheck(null)
 			setLoading(false)

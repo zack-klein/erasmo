@@ -330,7 +330,7 @@ export default function Portfolio() {
 										<Input
 											placeholder="AAPL" 
 											value={ticker}
-											onChange={(e) => setTicker(e.target.value)}
+											onChange={(e) => setTicker(e.target.value.toUpperCase())}
 										/>
 									</p>
 									<Message

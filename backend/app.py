@@ -108,9 +108,13 @@ def shares(portfolio_id):
             abort(400, description=msg)
 
         if intention.upper() == "ADD":
-            response = operations.add_shares(portfolio_id, ticker, shares)
+            response = operations.add_shares(
+                portfolio_id, ticker.upper(), shares
+            )
         elif intention.upper() == "REMOVE":
-            response = operations.remove_shares(portfolio_id, ticker, shares)
+            response = operations.remove_shares(
+                portfolio_id, ticker.upper(), shares
+            )
 
     elif request.method == "DELETE":
         data = request.get_json(force=True)
@@ -120,7 +124,7 @@ def shares(portfolio_id):
             msg = "Need: ticker."
             abort(400, msg)
 
-        response = operations.remove_company(portfolio_id, ticker)
+        response = operations.remove_company(portfolio_id, ticker.upper())
 
     return {"results": response}
 

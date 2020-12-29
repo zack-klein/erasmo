@@ -1,5 +1,6 @@
 boto3
 flask
 gunicorn
+requests
 simplejson
 yfinance

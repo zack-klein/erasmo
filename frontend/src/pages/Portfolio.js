@@ -281,13 +281,15 @@ export default function Portfolio() {
 			// Reset the charts to be loading
 			setPortfolioValue("Recalculating portfolio value...")
 			setAggTimeChartCheck(null)
-			setLoading(false)
-			let msg = `${intention} ${shares} ${ticker} completed successfully!`
-			setSuccessMsg(msg)
-			setSuccess(true)
 
 			// Trigger reloads
 			setReloader(newReloader)
+
+			// Mark everything as successful
+			setLoading(false)
+			setSuccessMsg(`${intention} ${shares} ${ticker} completed successfully!`)
+			setSuccess(true)
+
 		}).catch((e) => {
 			setLoading(false)
 			setErrMsg(e.toString())

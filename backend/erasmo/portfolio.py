@@ -194,7 +194,8 @@ class Portfolio:
             for company in filtered.columns:
                 if company != "Total":
                     shares = self._get_shares(company)
-                    filtered["Total"] += filtered[company] * float(shares)
+                    filtered[company] = filtered[company] * float(shares)
+                    filtered["Total"] += filtered[company]
 
         # Clean it up a bit
         as_dict = json.loads(filtered.to_json())

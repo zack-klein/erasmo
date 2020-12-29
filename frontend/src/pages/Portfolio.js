@@ -1,4 +1,4 @@
-import { Doughnut } from "react-chartjs-2";
+import { Doughnut, Line } from "react-chartjs-2";
 import { useParams, Redirect } from "react-router-dom";
 import { Button, Container, Dropdown, Form, Grid, Header, Input, Label, Loader, Message, Statistic } from "semantic-ui-react";
 
@@ -50,6 +50,38 @@ function stringToColor(str) {
 }
 
 
+function buildHistoricalPricesAgg(response) {
+	let labels = [];
+	let prices = [];
+	let chart;
+
+	let history = response.results.prices.Total
+
+	for (const [dateInt, price] of Object.entries(history)) {
+
+		let date = new Date(parseInt(dateInt));
+
+	  labels.push(date.toLocaleDateString())
+	  prices.push(price)
+	}
+
+	let chartData = {
+	  labels: labels,
+	  datasets: [
+	    {
+	      label: 'Portfolio Value ($)',
+	      data: prices,
+	      fill: false,
+	      backgroundColor: 'rgb(255, 99, 132)',
+	      borderColor: 'rgba(255, 99, 132, 0.2)',
+	    },
+	  ],
+	}
+	chart = <Line data={chartData} />
+
+	return chart
+}
+
 function buildDoughnut(response) {
 	let labels = [];
 	let shares = [];
@@ -88,21 +120,32 @@ function buildDoughnut(response) {
 
 export default function Portfolio() {
 
-	const [doughnut, setDoughnut] = useState(<Loader active />);
-	const [healthy, setHealthy] = useState(<Label color="grey" content="Checking health..." />);
+	
+	// Used to reload useEffects
 	const [reloader, setReloader] = useState("");
-	const [intention, setIntention] = useState("ADD");
-	const [shares, setShares] = useState(10);
-	const [ticker, setTicker] = useState("AAPL");
-	const [value, setValue] = useState("Fetching portfolio stats...")
+
+	// Health Check
+	const [healthy, setHealthy] = useState(<Label color="grey" content="Checking health..." />);
+	
+	// Redirects
 	const [redirect, setRedirect] = useState(null)
 
-	// Used to change the state of the form
+	// Graphs
+	const [doughnut, setDoughnut] = useState(<Loader active />);
+	const [timeChart, setTimeChart] = useState(<Loader active />);
+
+	// Constrols the state of the form to CRUD shares
 	const [success, setSuccess] = useState(false)
 	const [successMsg, setSuccessMsg] = useState("")
 	const [error, setError] = useState(false)
 	const [errMsg, setErrMsg] = useState("")
 	const [loading, setLoading] = useState(false)
+
+	// Controls the values in the form
+	const [intention, setIntention] = useState("ADD");
+	const [shares, setShares] = useState(10);
+	const [ticker, setTicker] = useState("AAPL");
+	const [value, setValue] = useState("Fetching portfolio stats...")
 
 
 	var params = useParams();
@@ -195,7 +238,9 @@ export default function Portfolio() {
 		}).then(json => {
 			let newValue = json.results.value
 			let newDoughnut = buildDoughnut(json)
+			let newTimeChart = buildHistoricalPricesAgg(json)
 			setDoughnut(newDoughnut)
+			setTimeChart(newTimeChart)
 			setValue(
 				<Statistic>
 			    <Statistic.Value>${numberWithCommas(newValue.toFixed(2))}</Statistic.Value>
@@ -216,7 +261,7 @@ export default function Portfolio() {
 		<Container>
 			<MainMenu healthy={healthy} />
 
-			<Container text>
+			<Container>
 
 				<Grid>
 
@@ -236,7 +281,10 @@ export default function Portfolio() {
 						</Grid.Column>
 					</Grid.Row>
 
-					<Grid.Row columns={1}>
+					<Grid.Row columns={2}>
+						<Grid.Column>
+							{timeChart}
+						</Grid.Column>
 						<Grid.Column>
 							{doughnut}
 						</Grid.Column>

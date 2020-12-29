@@ -1,6 +1,6 @@
 import { Doughnut, Line } from "react-chartjs-2";
 import { useParams, Redirect } from "react-router-dom";
-import { Button, Checkbox, Container, Dropdown, Form, Grid, Header, Input, Label, Loader, Message, Statistic } from "semantic-ui-react";
+import { Button, Checkbox, Container, Dropdown, Form, Grid, Header, Icon, Input, Label, Loader, Modal, Message, Statistic } from "semantic-ui-react";
 
 import { useEffect, useState } from "react";
 
@@ -163,6 +163,40 @@ function buildDoughnut(response) {
 
 	
 	return chart
+}
+
+function DeleteModal({ portfolioId, deletePortfolio=() => null }) {
+	const [open, setOpen] = React.useState(false)
+
+	var onDelete = () => {
+		deletePortfolio()
+		setOpen(false)
+	}
+
+	return (
+		<Modal
+	      closeIcon
+	      open={open}
+	      trigger={<Button color="red" icon="trash" content={`Delete ${portfolioId}`}  />}
+	      onClose={() => setOpen(false)}
+	      onOpen={() => setOpen(true)}
+	    >
+	      <Header icon='trash' content='Confirmation Required' />
+	      <Modal.Content>
+	        <p>
+	          There's no going back! Are you sure you'd like to delete this {portfolioId}?
+	        </p>
+	      </Modal.Content>
+	      <Modal.Actions>
+	        <Button color='grey' onClick={() => setOpen(false)}>
+	          Cancel
+	        </Button>
+	        <Button color='red' onClick={onDelete}>
+	          <Icon name='remove' /> Delete
+	        </Button>
+	      </Modal.Actions>
+	    </Modal>
+	)
 }
 
 
@@ -430,12 +464,7 @@ export default function Portfolio() {
 					<Grid.Row columns={1}>
 						<Grid.Column>
 							<div align="right">
-								<Button
-									icon='trash'
-									color="red"
-									content="Delete this portfolio" 
-									onClick={onDeletePortfolio}
-								/>
+								<DeleteModal portfolioId={params.portfolioId} deletePortfolio={onDeletePortfolio} />
 							</div>
 						</Grid.Column>
 					</Grid.Row>

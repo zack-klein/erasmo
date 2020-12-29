@@ -1,12 +1,14 @@
-import { Container, Form, Grid, Header, Icon, Label, List, Message } from "semantic-ui-react";
+import { Container, Form, Grid, Header, Icon, Image, Label, Loader, List, Message } from "semantic-ui-react";
 
 import { Link, Redirect } from "react-router-dom";
 
 import { useState, useEffect, Fragment } from "react";
 
 import MainMenu from "../components/MainMenu";
-
+import Footer from "../components/Footer";
 import getSettings from "../settings"
+
+import logo from "../imgs/transparentNoText.png"
 
 
 const settings = getSettings()
@@ -46,6 +48,14 @@ export default function Home() {
 	const [redirect, setRedirect] = useState(null)
 	const [reloader, setReloader] = useState("")
 
+	// Controls the state of the "add portfolio" form
+	const [success, setSuccess] = useState(false)
+	const [successMsg, setSuccessMsg] = useState("")
+	const [loading, setLoading] = useState(false)
+	const [error, setError] = useState(false)
+	const [errMsg, setErrMsg] = useState("")
+
+
 	useEffect(() => {
 
 		fetch(`${settings.apiUrl}/portfolio/`).then(response => {
@@ -65,6 +75,9 @@ export default function Home() {
 	}, [reloader])
 
 	var onSubmit = () => {
+		// Display things as loading
+		setLoading(true)
+
 		fetch(`${settings.apiUrl}/portfolio/`, {
 			method: "post",
 			body: JSON.stringify({ portfolio_id: portfolioId })
@@ -76,10 +89,17 @@ export default function Home() {
 			}
 		}).then((json) => {
 			var newPortfolios = <PortfolioList {...json} />
+
+			setLoading(false)
+			setSuccess(true)
+			setSuccessMsg(`Successfully created: ${portfolioId}!`)
 			setPortfolios(newPortfolios)
 			setReloader(reloader + "0")
 		}).catch((e) => {
-			setPortfolios(<Label color="red" content="Failed!" />)
+			setPortfolios("An error occured. Please refresh the page.")
+			setLoading(false)
+			setError(true)
+			setErrMsg(e.toString())
 		})
 	}
 
@@ -88,7 +108,7 @@ export default function Home() {
 	return (
 
 		<Container>
-			<MainMenu healthy={<></>} />
+			<MainMenu healthy={null} />
 
 			<Container text>
 				<Grid>
@@ -105,11 +125,13 @@ export default function Home() {
 					<Grid.Row columns={1}>
 						<Grid.Column>
 							<div align="center">
+								<Image src={logo} size="small" />
 								<p>
 									Erasmo is a tool to build fake stock portfolios. 
 
-									<br></br>
+								</p>
 
+								<p>
 									You can create a new portfolio, or you can view/modify
 									an existing one.
 								</p>
@@ -119,7 +141,7 @@ export default function Home() {
 
 					<Grid.Row columns={2}>
 						<Grid.Column>
-							<Form onSubmit={onSubmit}>
+							<Form onSubmit={onSubmit} loading={loading} success={success} error={error}>
 								<Header size="large">
 									New Portfolio
 								</Header>
@@ -128,6 +150,14 @@ export default function Home() {
 									onChange={(e) => setPortfolioId(e.target.value)}
 									value={portfolioId}
 								/>
+								<Message
+						      success
+						      header={successMsg}
+						    />
+						    <Message
+						      error
+						      header={errMsg}
+						    />
 								<div align="right">
 									<Form.Button type="submit" color="green" content="Create" />
 								</div>
@@ -141,23 +171,10 @@ export default function Home() {
 						</Grid.Column>
 					</Grid.Row>
 
-					<Grid.Row columns={1}>
-						<Grid.Column>
-							<Message icon color="yellow">
-							    <Icon name='warning sign' />
-							    <Message.Content>
-							      <Message.Header>Disclaimer</Message.Header>
-							      This is an app built for fun to buy and sell <b>fake</b> stocks. 
-							      The "transactions" on this platform are entirely fake, and
-							      should obviously not be used for any kind of investment
-							      decision.
-							    </Message.Content>
-							  </Message>
-						</Grid.Column>
-					</Grid.Row>
-
 				</Grid>
 			</Container>
+
+		<Footer />
 
 		</Container>
 	)

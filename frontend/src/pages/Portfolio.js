@@ -7,6 +7,7 @@ import { useEffect, useState } from "react";
 import React from "react"
 
 import MainMenu from "../components/MainMenu"
+import Footer from "../components/Footer"
 
 import getSettings from "../settings"
 
@@ -63,7 +64,7 @@ function buildHistoricalPricesAgg(response) {
 			let date = new Date(parseInt(dateInt));
 
 		  labels.push(date.toLocaleDateString())
-		  prices.push(price)
+		  prices.push(parseInt(price))
 		}
 
 		let chartData = {
@@ -140,6 +141,7 @@ export default function Portfolio() {
 	const [redirect, setRedirect] = useState(null)
 
 	// Graphs
+	const [portfolioValue, setPortfolioValue] = useState("Fetching portfolio stats...")
 	const [doughnut, setDoughnut] = useState(<Loader active />);
 	const [timeChart, setTimeChart] = useState(<Loader active />);
 
@@ -154,7 +156,6 @@ export default function Portfolio() {
 	const [intention, setIntention] = useState("ADD");
 	const [shares, setShares] = useState(10);
 	const [ticker, setTicker] = useState("AAPL");
-	const [value, setValue] = useState("Fetching portfolio stats...")
 
 
 	var params = useParams();
@@ -181,12 +182,16 @@ export default function Portfolio() {
 			}
 
 		}).then((json) => {
+			// Reset the charts to be loading
 			setDoughnut(<Loader active/>)
 			setTimeChart(<Loader active/>)
+			setPortfolioValue("Recalculating portfolio value...")
 			setLoading(false)
 			let msg = `${intention} ${shares} ${ticker} completed successfully!`
 			setSuccessMsg(msg)
 			setSuccess(true)
+
+			// Trigger reloads
 			setReloader(newReloader)
 		}).catch((e) => {
 			setLoading(false)
@@ -252,7 +257,7 @@ export default function Portfolio() {
 			let newTimeChart = buildHistoricalPricesAgg(json)
 			setDoughnut(newDoughnut)
 			setTimeChart(newTimeChart)
-			setValue(
+			setPortfolioValue(
 				<Statistic>
 			    <Statistic.Value>${numberWithCommas(newValue.toFixed(2))}</Statistic.Value>
 			    <Statistic.Label>Total portfolio value</Statistic.Label>
@@ -272,14 +277,16 @@ export default function Portfolio() {
 		<Container>
 			<MainMenu healthy={healthy} />
 
-			<Container>
+			<Container style={{ marginTop: "1em" }}>
 
 				<Grid>
 
 					<Grid.Row columns={1}>
 						<Grid.Column>
 							<Header size="huge">
-								{params.portfolioId}
+								<div align="center">
+									{params.portfolioId}
+								</div>
 							</Header>
 						</Grid.Column>
 					</Grid.Row>
@@ -287,7 +294,7 @@ export default function Portfolio() {
 					<Grid.Row columns={1}>
 						<Grid.Column>
 							<div align="center">
-								{value}
+								{portfolioValue}
 							</div>
 						</Grid.Column>
 					</Grid.Row>
@@ -361,6 +368,7 @@ export default function Portfolio() {
 
 			</Container>
 
+			<Footer />
 
 		</Container>
 	)

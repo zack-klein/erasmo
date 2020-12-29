@@ -55,29 +55,39 @@ function buildHistoricalPricesAgg(response) {
 	let prices = [];
 	let chart;
 
-	let history = response.results.prices.Total
+	if (response.results.prices) {
+		let history = response.results.prices.Total
 
-	for (const [dateInt, price] of Object.entries(history)) {
+		for (const [dateInt, price] of Object.entries(history)) {
 
-		let date = new Date(parseInt(dateInt));
+			let date = new Date(parseInt(dateInt));
 
-	  labels.push(date.toLocaleDateString())
-	  prices.push(price)
+		  labels.push(date.toLocaleDateString())
+		  prices.push(price)
+		}
+
+		let chartData = {
+		  labels: labels,
+		  datasets: [
+		    {
+		      label: 'Portfolio Value ($)',
+		      data: prices,
+		      fill: false,
+		      backgroundColor: 'rgb(255, 99, 132)',
+		      borderColor: 'rgba(255, 99, 132, 0.2)',
+		    },
+		  ],
+		}
+		chart = <Line data={chartData} />
+	} else {
+		chart = (
+			<div>
+			</div>
+		)
 	}
 
-	let chartData = {
-	  labels: labels,
-	  datasets: [
-	    {
-	      label: 'Portfolio Value ($)',
-	      data: prices,
-	      fill: false,
-	      backgroundColor: 'rgb(255, 99, 132)',
-	      borderColor: 'rgba(255, 99, 132, 0.2)',
-	    },
-	  ],
-	}
-	chart = <Line data={chartData} />
+
+	
 
 	return chart
 }
@@ -107,8 +117,7 @@ function buildDoughnut(response) {
 
 	} else {
 		chart = (
-			<div align="center">
-				There's nothing here! Make a transaction below.
+			<div>
 			</div>
 		)
 	}
@@ -172,6 +181,8 @@ export default function Portfolio() {
 			}
 
 		}).then((json) => {
+			setDoughnut(<Loader active/>)
+			setTimeChart(<Loader active/>)
 			setLoading(false)
 			let msg = `${intention} ${shares} ${ticker} completed successfully!`
 			setSuccessMsg(msg)

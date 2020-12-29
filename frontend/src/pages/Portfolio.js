@@ -128,10 +128,6 @@ function buildHistoricalPrices(response, aggregated) {
 			</div>
 		)
 	}
-
-
-	
-
 	return chart
 }
 
@@ -203,6 +199,28 @@ export default function Portfolio() {
 
 
 	var params = useParams();
+
+	var buildAggregateCheckbox = (response) => {
+
+		let checkbox;
+
+		if (response.results.prices) {
+			checkbox = (
+				<div align="center">
+					<Checkbox 
+						label='Group Stocks'
+						checked={aggTimeChart}
+						onChange={onAggregateTimeChart}
+					/>
+				</div>
+			)
+		} else {
+			checkbox = null
+		}
+		console.log(response)
+
+		return checkbox
+	}
 
 	var onSubmit = () => {
 		setLoading(true)
@@ -305,17 +323,10 @@ export default function Portfolio() {
 			let newValue = json.results.value
 			let newDoughnut = buildDoughnut(json)
 			let newTimeChart = buildHistoricalPrices(json, aggTimeChart)
+			let newCheckbox = buildAggregateCheckbox(json)
 			setDoughnut(newDoughnut)
 			setTimeChart(newTimeChart)
-			setAggTimeChartCheck(
-				<div align="center">
-					<Checkbox 
-						label='Group Stocks'
-						checked={aggTimeChart}
-						onChange={onAggregateTimeChart}
-					/>
-				</div>
-			)
+			setAggTimeChartCheck(newCheckbox)
 			setPortfolioValue(
 				<Statistic>
 			    <Statistic.Value>${numberWithCommas(newValue.toFixed(2))}</Statistic.Value>

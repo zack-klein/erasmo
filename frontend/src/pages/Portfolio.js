@@ -184,7 +184,7 @@ function DeleteModal({ portfolioId, deletePortfolio=() => null }) {
 	      <Header icon='trash' content='Confirmation Required' />
 	      <Modal.Content>
 	        <p>
-	          There's no going back! Are you sure you'd like to delete this {portfolioId}?
+	          There's no going back! Are you sure you'd like to delete {portfolioId}?
 	        </p>
 	      </Modal.Content>
 	      <Modal.Actions>

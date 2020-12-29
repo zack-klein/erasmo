@@ -312,8 +312,8 @@ export default function Portfolio() {
 						<Grid.Column>
 							<div align="center">
 								<Form onSubmit={onSubmit} success={success} loading={loading} error={error}>
-									<p>
-										I want to 
+									<Form.Field inline>
+										<label>I want to </label>
 										<Dropdown
 										    placeholder='Select an action'
 										    selection
@@ -321,34 +321,39 @@ export default function Portfolio() {
 										    value={intention}
 										    onChange={(e) => setIntention(e.target.innerText)}
 										  />
+									</Form.Field>
+									<Form.Field inline>
 										 <Input
 										 	placeholder="10" 
 										 	value={shares}
 										 	onChange={(e) => setShares(e.target.value)}
 										 />
-										shares of 
+										<label>shares of</label>
+									</Form.Field>
+									<Form.Field inline>
 										<Input
 											placeholder="AAPL" 
 											value={ticker}
 											onChange={(e) => setTicker(e.target.value.toUpperCase())}
 										/>
-									</p>
-									<Message
-							      success
-							      header='Transaction Succeeded'
-							      content={successMsg}
-							    />
-							    <Message
-							      error
-							      header='Transaction Failed'
-							      content={errMsg}
-							    />
-									<Form.Button type="submit">
-										Submit
+									</Form.Field>
+							    	<Message
+								      success
+								      header='Transaction Succeeded'
+								      content={successMsg}
+								    />
+								    <Message
+								      error
+								      header='Transaction Failed'
+								      content={errMsg}
+								    />
+							    	<Form.Button type="submit">
+											Submit
 									</Form.Button>
 								</Form>
 							</div>
 						</Grid.Column>
+
 					</Grid.Row>
 
 					<Grid.Row columns={1}>

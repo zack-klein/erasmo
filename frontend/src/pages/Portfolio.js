@@ -1,6 +1,6 @@
 import { Doughnut, Line } from "react-chartjs-2";
 import { useParams, Redirect } from "react-router-dom";
-import { Button, Container, Dropdown, Form, Grid, Header, Input, Label, Loader, Message, Statistic } from "semantic-ui-react";
+import { Button, Checkbox, Container, Dropdown, Form, Grid, Header, Input, Label, Loader, Message, Statistic } from "semantic-ui-react";
 
 import { useEffect, useState } from "react";
 
@@ -51,33 +51,75 @@ function stringToColor(str) {
 }
 
 
-function buildHistoricalPricesAgg(response) {
-	let labels = [];
-	let prices = [];
+function buildHistoricalPrices(response, aggregated) {
 	let chart;
+	let chartData;
+	let labels = [];
 
 	if (response.results.prices) {
-		let history = response.results.prices.Total
+		
+		if (aggregated) {
 
-		for (const [dateInt, price] of Object.entries(history)) {
+			let prices = [];
+			let history = response.results.prices.Total
+			for (const [dateInt, price] of Object.entries(history)) {
+				let date = new Date(parseInt(dateInt));
+			  	labels.push(date.toLocaleDateString())
+			  	prices.push(parseInt(price))
+			}
+			
 
-			let date = new Date(parseInt(dateInt));
+			chartData = {
+			  labels: labels,
+			  datasets: [
+			    {
+			      label: 'Portfolio Value ($)',
+			      data: prices,
+			      fill: false,
+			      backgroundColor: 'rgb(255, 99, 132)',
+			      borderColor: 'rgba(255, 99, 132, 0.2)',
+			    },
+			  ],
+			}
 
-		  labels.push(date.toLocaleDateString())
-		  prices.push(parseInt(price))
-		}
+		} else {
 
-		let chartData = {
-		  labels: labels,
-		  datasets: [
-		    {
-		      label: 'Portfolio Value ($)',
-		      data: prices,
-		      fill: false,
-		      backgroundColor: 'rgb(255, 99, 132)',
-		      borderColor: 'rgba(255, 99, 132, 0.2)',
-		    },
-		  ],
+			let datasets = [];
+			let history = response.results.prices.Total
+
+			for (const [dateInt, price] of Object.entries(history)) {
+
+				let date = new Date(parseInt(dateInt));
+			  	labels.push(date.toLocaleDateString())
+			  	
+			}
+
+			let companyPrices = response.results.prices
+
+			for (const [company, companyHistory] of Object.entries(companyPrices)) {
+				
+				if (company != "Total") {
+
+					let prices = [];
+					for (const [dateInt, price] of Object.entries(companyHistory)) {
+						prices.push(price)
+					}
+					let dataset = {
+				      label: company,
+				      data: prices,
+				      fill: false,
+				      backgroundColor: stringToColor(company),
+				      borderColor: stringToColor(company),
+				    }
+				    datasets.push(dataset)
+				}
+			}
+
+			chartData = {
+			  labels: labels,
+			  datasets: datasets,
+			}
+
 		}
 		chart = <Line data={chartData} />
 	} else {
@@ -144,6 +186,8 @@ export default function Portfolio() {
 	const [portfolioValue, setPortfolioValue] = useState("Fetching portfolio stats...")
 	const [doughnut, setDoughnut] = useState(<Loader active />);
 	const [timeChart, setTimeChart] = useState(<Loader active />);
+	const [aggTimeChartCheck, setAggTimeChartCheck] = useState(<div></div>);
+	const [aggTimeChart, setAggTimeChart] = useState(false);
 
 	// Constrols the state of the form to CRUD shares
 	const [success, setSuccess] = useState(false)
@@ -186,6 +230,7 @@ export default function Portfolio() {
 			setDoughnut(<Loader active/>)
 			setTimeChart(<Loader active/>)
 			setPortfolioValue("Recalculating portfolio value...")
+			setAggTimeChartCheck(null)
 			setLoading(false)
 			let msg = `${intention} ${shares} ${ticker} completed successfully!`
 			setSuccessMsg(msg)
@@ -198,8 +243,13 @@ export default function Portfolio() {
 			setErrMsg(e.toString())
 			setError(true)
 		})
+	}
 
-		
+	var onAggregateTimeChart = () => {
+		setTimeChart(<Loader active />)
+		setAggTimeChartCheck(null)
+		setAggTimeChart(!aggTimeChart)
+		setReloader(reloader + " ")
 	}
 
 	var onDeletePortfolio = () => {
@@ -254,9 +304,18 @@ export default function Portfolio() {
 		}).then(json => {
 			let newValue = json.results.value
 			let newDoughnut = buildDoughnut(json)
-			let newTimeChart = buildHistoricalPricesAgg(json)
+			let newTimeChart = buildHistoricalPrices(json, aggTimeChart)
 			setDoughnut(newDoughnut)
 			setTimeChart(newTimeChart)
+			setAggTimeChartCheck(
+				<div align="center">
+					<Checkbox 
+						label='Group Stocks'
+						checked={aggTimeChart}
+						onChange={onAggregateTimeChart}
+					/>
+				</div>
+			)
 			setPortfolioValue(
 				<Statistic>
 			    <Statistic.Value>${numberWithCommas(newValue.toFixed(2))}</Statistic.Value>
@@ -302,6 +361,7 @@ export default function Portfolio() {
 					<Grid.Row columns={2}>
 						<Grid.Column>
 							{timeChart}
+							{aggTimeChartCheck}
 						</Grid.Column>
 						<Grid.Column>
 							{doughnut}

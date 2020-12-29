@@ -136,6 +136,10 @@ dmypy.json
 
 # Cython debug symbols
 cython_debug/
+
+# Jupyter
+*.ipynb_checkpoints*
+
 # Local .terraform directories
 **/.terraform/*
 

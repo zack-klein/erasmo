@@ -2,7 +2,7 @@
 
 A nifty app to simulate trading stocks.
 
-![logo](./frontend/src/imgs/noText.png)
+![logo](./frontend/src/imgs/transparentNoText.png)
 
 :warning: This app doesn't actually trade stocks. It just lets you build virtual portfolios. It (obviously) shouldn't be used for any kind of investment decision.
 

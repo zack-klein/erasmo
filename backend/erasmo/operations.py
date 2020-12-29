@@ -79,3 +79,12 @@ def remove_company(portfolio_id, ticker):
     portfolio.remove_company(ticker)
     response = _update_portfolio(portfolio)
     return response
+
+
+def get_portfolio_historic_prices(name, start, end):
+    portfolio = _get_portfolio(name)
+    if portfolio:
+        prices = portfolio.get_historic_prices(start, end)
+        return prices
+    else:
+        return None

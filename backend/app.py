@@ -85,6 +85,11 @@ def shares(portfolio_id):
 
     if request.method == "GET":
         portfolio = operations.get_portfolio(portfolio_id)
+        # TODO: Add start and end as URL parameters
+        prices = operations.get_portfolio_historic_prices(
+            portfolio_id, None, None
+        )
+        portfolio["prices"] = prices
         response = portfolio
 
     elif request.method == "POST":

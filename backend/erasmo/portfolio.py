@@ -1,4 +1,6 @@
-from datetime import datetime
+import dateutil.parser
+
+from datetime import datetime, timedelta
 from decimal import Decimal
 
 import pandas as pd
@@ -143,6 +145,46 @@ class Portfolio:
                 return
 
         raise ValueError(f"{ticker} is not in the portfolio!")
+
+    def get_historic_prices(self, start=None, end=None):
+        """
+        Retrieves the prices for the portfolio for a chunk of time.
+        """
+        if not start:
+            start = datetime.now() - timedelta(days=1 * 365)
+        else:
+            start = dateutil.parser.parse(start)
+
+        if not end:
+            end = datetime.now() - timedelta(days=1)
+        else:
+            end = dateutil.parser.parse(end)
+
+        if self.data.empty:
+            return None
+
+        if len(self.companies) == 1:
+            filtered = self.data["Close"].to_frame()
+            filtered = filtered.loc[start:end]
+            filtered["Total"] = filtered["Close"]
+            del filtered["Close"]
+            ticker = self.companies[0]["ticker"]
+            filtered[ticker] = filtered["Total"]
+
+        else:
+            filtered = self.data["Close"]
+            filtered = filtered.loc[start:end]
+            filtered.fillna(0, inplace=True)
+            filtered["Total"] = 0
+
+            for column in filtered.columns:
+                if column != "Total":
+                    filtered["Total"] += filtered[column]
+
+        # Clean it up a bit
+        as_dict = json.loads(filtered.to_json())
+
+        return as_dict
 
     def to_ddb(self):
         """

@@ -82,6 +82,16 @@ class Portfolio:
 
         return company
 
+    def _get_shares(self, ticker):
+        """
+        Get the number of shares for a particular ticker.
+        """
+        company = self._get_company(ticker)
+        if company:
+            return company["shares"]
+        else:
+            return None
+
     def add_company(self, ticker, shares):
         """
         Add a company to the portfolio. If it already exists, just add the
@@ -166,10 +176,14 @@ class Portfolio:
         if len(self.companies) == 1:
             filtered = self.data["Close"].to_frame()
             filtered = filtered.loc[start:end]
-            filtered["Total"] = filtered["Close"]
+
+            company = self.companies[0]["ticker"]
+            shares = self._get_shares(company)
+
+            filtered["Total"] = filtered["Close"] * float(shares)
+            filtered[company] = filtered["Total"]
+
             del filtered["Close"]
-            ticker = self.companies[0]["ticker"]
-            filtered[ticker] = filtered["Total"]
 
         else:
             filtered = self.data["Close"]
@@ -177,9 +191,10 @@ class Portfolio:
             filtered.fillna(0, inplace=True)
             filtered["Total"] = 0
 
-            for column in filtered.columns:
-                if column != "Total":
-                    filtered["Total"] += filtered[column]
+            for company in filtered.columns:
+                if company != "Total":
+                    shares = self._get_shares(company)
+                    filtered["Total"] += filtered[company] * float(shares)
 
         # Clean it up a bit
         as_dict = json.loads(filtered.to_json())

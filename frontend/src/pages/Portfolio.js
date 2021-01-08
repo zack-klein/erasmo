@@ -1,6 +1,7 @@
 import { Doughnut, Line } from "react-chartjs-2";
 import { useParams, Redirect } from "react-router-dom";
 import { Button, Checkbox, Container, Dropdown, Form, Grid, Header, Icon, Input, Label, Loader, Modal, Message, Statistic } from "semantic-ui-react";
+import SemanticDatepicker from 'react-semantic-ui-datepickers';
 
 import { useEffect, useState } from "react";
 
@@ -199,7 +200,6 @@ function DeleteModal({ portfolioId, deletePortfolio=() => null }) {
 	)
 }
 
-
 export default function Portfolio() {
 
 	
@@ -216,8 +216,11 @@ export default function Portfolio() {
 	const [portfolioValue, setPortfolioValue] = useState("Fetching portfolio stats...")
 	const [doughnut, setDoughnut] = useState(<Loader active />);
 	const [timeChart, setTimeChart] = useState(<Loader active />);
-	const [aggTimeChartCheck, setAggTimeChartCheck] = useState(<div></div>);
 	const [aggTimeChart, setAggTimeChart] = useState(false);
+
+	// Edits the graphs
+	const [aggTimeChartCheck, setAggTimeChartCheck] = useState(<div></div>);
+	const [currentTimeRange, setNewTimeRange] = useState(null);
 
 	// Constrols the state of the form to CRUD shares
 	const [success, setSuccess] = useState(false)
@@ -231,8 +234,24 @@ export default function Portfolio() {
 	const [shares, setShares] = useState(10);
 	const [ticker, setTicker] = useState("");
 
-
 	var params = useParams();
+
+
+	// Reloads the graph based on the time range
+	var onChangeTimeRange = (data) => {
+		let newDateRange = data.value;
+
+		setNewTimeRange(newDateRange)
+
+		// We only care about changing the graph if a full range is selected
+		if (!data.value) {
+			let newReloader = reloader + "0"
+			setReloader(newReloader)
+		} else if (data.value.length == 2) {
+			let newReloader = reloader + "0"
+			setReloader(newReloader)
+		}
+	}
 
 	var buildAggregateCheckbox = (response) => {
 
@@ -241,18 +260,31 @@ export default function Portfolio() {
 		if (response.results.prices) {
 			checkbox = (
 				<div align="center">
-					<Checkbox 
-						label='Group Stocks'
-						checked={aggTimeChart}
-						onChange={onAggregateTimeChart}
-					/>
+				<Grid columns={1}>
+					<Grid.Row>
+						<Grid.Column>
+							<SemanticDatepicker
+								type="range" 
+								onChange={(e, data) => onChangeTimeRange(data)}
+							/>
+						</Grid.Column>
+					</Grid.Row>
+
+					<Grid.Row>
+						<Grid.Column>
+							<Checkbox 
+								label='Group Stocks'
+								checked={aggTimeChart}
+								onChange={onAggregateTimeChart}
+							/>
+						</Grid.Column>
+					</Grid.Row>
+				</Grid>					
 				</div>
 			)
 		} else {
 			checkbox = null
 		}
-		console.log(response)
-
 		return checkbox
 	}
 
@@ -343,10 +375,20 @@ export default function Portfolio() {
 
 	}, [params, reloader])
 
-	// Populate the components that depend on the fetch
+	// Populate the graphs
 	useEffect(() => {
 
-		fetch(`${settings.apiUrl}/portfolio/${params.portfolioId}`).then(response => {
+		let url;
+
+		if (currentTimeRange) {
+			let start = currentTimeRange[0].toLocaleDateString("fr-CA")
+			let end = currentTimeRange[1].toLocaleDateString("fr-CA")
+			url = `${settings.apiUrl}/portfolio/${params.portfolioId}?start=${start}&end=${end}`
+		} else {
+			url = `${settings.apiUrl}/portfolio/${params.portfolioId}`
+		}
+
+		fetch(url).then(response => {
 			if (response.ok) {
 				return response.json()	
 			}

@@ -245,9 +245,13 @@ export default function Portfolio() {
 
 		// We only care about changing the graph if a full range is selected
 		if (!data.value) {
+			setAggTimeChartCheck(<></>)
+			setTimeChart(<Loader active />)
 			let newReloader = reloader + "0"
 			setReloader(newReloader)
 		} else if (data.value.length == 2) {
+			setAggTimeChartCheck(<></>)
+			setTimeChart(<Loader active />)
 			let newReloader = reloader + "0"
 			setReloader(newReloader)
 		}
@@ -266,6 +270,7 @@ export default function Portfolio() {
 							<SemanticDatepicker
 								type="range" 
 								onChange={(e, data) => onChangeTimeRange(data)}
+								format="MM-DD-YYYY"
 							/>
 						</Grid.Column>
 					</Grid.Row>
@@ -389,6 +394,7 @@ export default function Portfolio() {
 		}
 
 		fetch(url).then(response => {
+			console.log(response)
 			if (response.ok) {
 				return response.json()	
 			}
@@ -405,13 +411,26 @@ export default function Portfolio() {
 			setAggTimeChartCheck(newCheckbox)
 			setPortfolioValue(
 				<Statistic>
-			    <Statistic.Value>${numberWithCommas(newValue.toFixed(2))}</Statistic.Value>
-			    <Statistic.Label>Total portfolio value</Statistic.Label>
-			  </Statistic>
+				    <Statistic.Value>${numberWithCommas(newValue.toFixed(2))}</Statistic.Value>
+				    <Statistic.Label>Total portfolio value</Statistic.Label>
+			    </Statistic>
 			 )
 		}).catch((e) => {
-			let txt = "Hmm... Can't find this portfolio. You sure it exists?";
-			setDoughnut(<Label color="red" content={`${txt}`} />)
+			console.log(e)
+			setDoughnut(<></>)
+			setTimeChart(<></>)
+			setAggTimeChartCheck(<></>)
+			setPortfolioValue(
+				<>
+					<Icon size="huge" color="yellow" name="warning sign" />
+					<Header>
+					    Uh oh, somethin' ain't workin!
+					</Header>
+					<p>
+						Please refresh the page and try again.
+					</p>
+				</>
+			)
 		})
 		
 		

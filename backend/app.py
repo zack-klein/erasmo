@@ -84,10 +84,18 @@ def portfolio():
 def shares(portfolio_id):
 
     if request.method == "GET":
+        data = request.args
+        start = data.get("start")
+        end = data.get("end")
+
+        if not all([start, end]):
+            start = None
+            end = None
+
         portfolio = operations.get_portfolio(portfolio_id)
-        # TODO: Add start and end as URL parameters
+
         prices = operations.get_portfolio_historic_prices(
-            portfolio_id, None, None
+            portfolio_id, start, end
         )
         portfolio["prices"] = prices
         response = portfolio

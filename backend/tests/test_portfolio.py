@@ -35,6 +35,3 @@ class TestPortfolio(unittest.TestCase):
     def setUp(self):
         self.portfolio_name = "Test Portfolio"
         self.portfolio = Portfolio(self.portfolio_name)
-
-    def test_dummy(self):
-        assert True

@@ -1,12 +1,8 @@
-import 'semantic-ui-css/semantic.min.css'
-import {
-  BrowserRouter as Router,
-  Switch,
-  Route
-} from "react-router-dom";
+import "semantic-ui-css/semantic.min.css";
+import { BrowserRouter as Router, Switch, Route } from "react-router-dom";
 
-import Home from "./pages/Home"
-import Portfolio from "./pages/Portfolio"
+import Home from "./pages/Home";
+import Portfolio from "./pages/Portfolio";
 
 function App() {
   return (
